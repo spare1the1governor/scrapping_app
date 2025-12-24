@@ -7,7 +7,7 @@ from tkinter import filedialog, messagebox
 import threading
 import os
 from datetime import datetime 
-# from src.core import database, scraper
+from src.core import database, scraper
 
 
 # Настройка темы
