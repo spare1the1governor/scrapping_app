@@ -1,3 +1,5 @@
+'''
+Модуль для скраппинга данных с сайта vuzopedia.ru'''
 import os
 import pandas as pd
 import requests

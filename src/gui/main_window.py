@@ -7,7 +7,8 @@ from tkinter import filedialog, messagebox
 import threading
 import os
 from datetime import datetime 
-from src.core import database, scraper
+# from core.database import DatabaseSaver
+# from scraper import ScrapperOptimized
 
 
 # Настройка темы
@@ -160,10 +161,9 @@ class UniversityScraperApp(ctk.CTk):
             self.log("🚀 Начало парсинга...")
             from core.scraper import ScrapperOptimized
             from core.database import DatabaseSaver
-            
-            db = DatabaseSaver()
+            db = DatabaseSaver(self.db_path)
             scraper = ScrapperOptimized(db)
-            scraper.scrape_all()
+            scraper.scrapping()
             self.excel_name=self.excel_name+".xlsx"
             db.export_to_excel_programs(self.excel_name or "exported_data.xlsx")
             
@@ -185,10 +185,13 @@ class UniversityScraperApp(ctk.CTk):
 
 
 # Точка входа
-if __name__ == "__main__":
-    app = UniversityScraperApp()
-    app.mainloop()
-
+# if __name__ == "__main__":
+#     app = UniversityScraperApp()
+#     app.mainloop()
+# def create_window():    
+#     db = DatabaseSaver()
+#     app = UniversityScraperApp(db)
+#     app.mainloop()
 
 
 

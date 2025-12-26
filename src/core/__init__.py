@@ -1,4 +1,4 @@
-from .scraper import ScrapperOptimized
-from .database import DatabaseSaver
+# from .scraper import ScrapperOptimized
+# from .database import DatabaseSaver
 
-__all__ = ['ScrapperOptimized', 'DatabaseSaver']
+# __all__ = ['ScrapperOptimized', 'DatabaseSaver']

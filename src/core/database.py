@@ -1,3 +1,5 @@
+'''
+Модуль для сохранения данных в базу данных и экспорта в Excel'''
 import sqlite3
 import pandas as pd
 
