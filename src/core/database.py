@@ -6,6 +6,7 @@ from pathlib import Path
 from data.mapping import mapping_320
 
 
+
 class DatabaseSaver:
     def __init__(self, db_path: Path | None = None):
 
@@ -82,11 +83,14 @@ class DatabaseSaver:
         df = pd.read_sql_query("SELECT * FROM final_info", self.conn)
         #деление на обязательные егэ и по выбору
         df[['ege','ege_1']] = df['ege'].str.rsplit(',', n=1, expand=True)
-
-        tmp = df["faculty"].map(mapping_320).apply(pd.Series)
-        tmp.columns = ["faculty_macro", "faculty"]# переименование колонок          
-        df[["faculty_macro", "faculty"]] = tmp
-        df.rename(columns={'direction_names': 'направление', 'city_name': 'город', 'faculty': 'факультет', 'faculty_id': '№ направления',
+        try: 
+            tmp = df["faculty"].map(mapping_320).apply(pd.Series)
+            tmp.columns = ["faculty_macro", "faculty"]# переименование колонок          
+            df[["faculty_macro", "faculty"]] = tmp  
+        except Exception as e:
+            print(f" Ошибка при маппинге факультетов: {e}")    
+            
+        df = df.rename(columns={'direction_names': 'направление', 'city_name': 'город', 'faculty': 'факультет', 'faculty_id': '№ направления',
                            'university_name': 'университет', 'ege': 'обязательные ЕГЭ', 'ege_1': 'ЕГЭ по выбору', 'cost': 'стоимость', 'points_for_budget': 'баллы для бюджета',
                            'budget_funded': 'бюджетные места', 'points_for_contract': 'баллы для контракта', 'contract_funded': 'контрактные места'})
         df.to_excel(filename, index=False)

@@ -9,6 +9,7 @@ import os
 from datetime import datetime 
 from src.utils.logger import setup_logger
 from pathlib import Path
+import sys  
 
 # from core.database import DatabaseSaver
 # from scraper import ScrapperOptimized
@@ -138,6 +139,7 @@ class UniversityScraperApp(ctk.CTk):
             font=ctk.CTkFont(size=11, family="Consolas")
         )
         self.log_text.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        sys.stdout = TextRedirector(self.log_text)
     
     
     def start_scraping(self):
@@ -157,28 +159,49 @@ class UniversityScraperApp(ctk.CTk):
         # Запускаем в отдельном потоке
         thread = threading.Thread(target=self.scraping_worker, daemon=True)
         thread.start()
+        
     
     def scraping_worker(self):
         """Рабочая функция парсинга (выполняется в отдельном потоке)"""
         try:
             EXPORTS_DIR = Path("exports")
             self.log("🚀 Начало парсинга...")
-            from src.core.scraper import scrapping
+            
+            from src.core.scraper import scrapping 
             from src.core.database import DatabaseSaver
+            
+            # Получаем объект scraper
+            scraper = scrapping()  # Теперь возвращает scraper, но ещё не запущен
+            
+            # Запускаем обновление прогресса
+            self.update_progress(scraper)
+            
+            # Запускаем парсинг
+            scraper.scrape_all()
+            
+            # Экспорт
             db = DatabaseSaver()
-            scrapping()
-            file_name=f"{self.excel_name.get()}.xlsx"
+            file_name = f"{self.excel_name.get()}.xlsx"
             db.export_to_excel_programs(EXPORTS_DIR / (file_name or "exported_data.xlsx"))
             
+            self.log("✅ Парсинг завершён!")
             
         except Exception as e:
-            logger.info({str(e)})
-            self.log(f"Ошибка: {str(e)}")
-            messagebox.showerror("Ошибка", f"Произошла ошибка:\n{str(e)}")
-        
+            self.log(f" Ошибка: {e}")
         finally:
             self.is_scraping = False
             self.start_button.configure(state="normal", text="▶ Начать парсинг")
+
+
+    def update_progress(self, scraper):
+        """Обновляет прогресс-бар"""
+        if self.is_scraping:
+            progress = scraper.download_percentage() / 100
+            self.progress.set(progress)
+            self.status_label.configure(text=f"Прогресс: {progress*100:.1f}%")
+            
+            # Обновляем каждые 500ms
+            self.after(500, lambda: self.update_progress(scraper))
     
     
     def log(self, message):
@@ -187,15 +210,20 @@ class UniversityScraperApp(ctk.CTk):
         self.log_text.insert("end", f"[{timestamp}] {message}\n")
         self.log_text.see("end")
 
+class TextRedirector:   
+        """Перенаправляет print() в textbox"""
+        
+        def __init__(self, textbox):
+            self.textbox = textbox
+        
+        def write(self, text):
+            self.textbox.insert("end", text)
+            self.textbox.see("end")
+        
+        def flush(self):
+            pass
 
-# Точка входа
-# if __name__ == "__main__":
-#     app = UniversityScraperApp()
-#     app.mainloop()
-# def create_window():    
-#     db = DatabaseSaver()
-#     app = UniversityScraperApp(db)
-#     app.mainloop()
+
 
 
 

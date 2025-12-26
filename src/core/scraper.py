@@ -20,6 +20,8 @@ class ScrapperOptimized:
         self.session = self._create_session()
         self.total_saved = 0
         self.total_errors = 0
+        self.all_uni=0
+        self.uni_counter=0
     
     def _create_session(self):
         """Создаёт сессию с повторными попытками"""
@@ -120,8 +122,8 @@ class ScrapperOptimized:
     
     def scrape_university(self, uni_id, university_name, city_name):
         """Парсит один университет"""
-        
-        logger.info(f"\n Обработка: {university_name} ({uni_id})")
+        self.uni_counter+=1
+        print(f"\n Обработка: {university_name} ({uni_id})")
         
         # Получаем первую страницу
         first_url = f'https://vuzopedia.ru/vuz/{uni_id}/programs/bakispec?page=1'
@@ -158,16 +160,17 @@ class ScrapperOptimized:
                 try:
                     self.db.save_all_data(page_results)
                     uni_total += len(page_results)
-                    logger.debug(f"  Страница {page_num}/{total_pages}: сохранено {len(page_results)} программ")
+                    logger.info(f"  Страница {page_num}/{total_pages}: сохранено {len(page_results)} программ")
                 except Exception as e:
                     logger.error(f"  Ошибка сохранения страницы {page_num}: {e}")
                     self.total_errors += 1
         
-        logger.debug(f"  Итого по вузу: {uni_total} программ")
+        logger.info(f"  Итого по вузу: {uni_total} программ")
         self.total_saved += uni_total
         return uni_total
     
-    def scrape_all(self, csv_file=r"C:\Users\Lenovo\Desktop\vuzopedia_scrapping\data\necessary_notese.csv"):
+   
+    def scrape_all(self, csv_file=r"data/test.csv"):
         """Парсит все университеты из CSV"""
         logger.info(" Начало скраппинга...")
         
@@ -176,7 +179,8 @@ class ScrapperOptimized:
         
         try:
             df = pd.read_csv(csv_file)
-            logger.info(f"Загружено университетов: {len(df)}")
+            self.all_uni=len(df)
+            print(f"Загружено университетов: {len(df)}")
         except Exception as e:
             logger.error(f" Ошибка чтения CSV: {e}")
             return
@@ -192,18 +196,24 @@ class ScrapperOptimized:
         
         elapsed = time.time() - start_time
 
-        logger.info(f"\n{'='*60}")
         logger.info(f"✅ Скраппинг завершён!")
-        logger.info(f" Всего сохранено программ: {self.total_saved}")
+        print(f" Всего сохранено программ: {self.total_saved}")
         logger.info(f"Ошибок: {self.total_errors}")
-        logger.info(f" Время выполнения: {elapsed:.1f} сек ({elapsed/60:.1f} мин)")
+        print(f" Время выполнения: {elapsed:.1f} сек ({elapsed/60:.1f} мин)")
         
         self.db.close()
-
+        
+    def download_percentage(self):
+        """Возвращает процент завершения скраппинга"""
+        if self.all_uni == 0:
+            return 0
+        return (self.uni_counter / self.all_uni) * 100
+    
     # Использование:
-def scrapping():  
-        db = DatabaseSaver()
-        scraper = ScrapperOptimized(db)  
-        scraper.scrape_all()
+def scrapping():
+    db = DatabaseSaver()
+    scraper = ScrapperOptimized(db)
+    return scraper
+
 
 
