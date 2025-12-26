@@ -1,0 +1,38 @@
+2025-12-26 15:44:01,861 | INFO | src.gui.main_window | scraping_worker | {"'ScrapperOptimized' object has no attribute 'scrapping'"}
+2025-12-26 15:49:43,578 | INFO | src.gui.main_window | scraping_worker | {"'ScrapperOptimized' object has no attribute 'scrapping'"}
+2025-12-26 16:16:22,072 | INFO | src.gui.main_window | scraping_worker | {"'ScrapperOptimized' object has no attribute 'scrapping'"}
+2025-12-26 16:22:40,930 | INFO | src.gui.main_window | scraping_worker | {"'ScrapperOptimized' object has no attribute 'scrapping'"}
+2025-12-26 16:24:13,322 | INFO | src.gui.main_window | scraping_worker | {"'Logger' object has no attribute 'basicConfig'"}
+2025-12-26 16:25:30,632 | INFO | src.core.scraper | scrape_all |  Начало скраппинга...
+2025-12-26 16:25:30,635 | ERROR | src.core.scraper | scrape_all |  Ошибка чтения CSV: [Errno 2] No such file or directory: 'c:\\Users\\Lenovo\\Desktop\\vuzopedia_scrapping\\src\\core\\data\\necessary_notes.csv'
+2025-12-26 16:25:30,635 | INFO | src.gui.main_window | scraping_worker | {"unsupported operand type(s) for +: 'CTkEntry' and 'str'"}
+2025-12-26 16:31:11,209 | INFO | src.core.scraper | scrape_all |  Начало скраппинга...
+2025-12-26 16:31:11,210 | ERROR | src.core.scraper | scrape_all |  Ошибка чтения CSV: [Errno 2] No such file or directory: 'c:\\Users\\Lenovo\\Desktop\\vuzopedia_scrapping\\src\\core\\data\\necessary_notes.csv'
+2025-12-26 16:36:42,881 | INFO | src.core.scraper | scrape_all |  Начало скраппинга...
+2025-12-26 16:36:42,888 | INFO | src.core.scraper | scrape_all | Загружено университетов: 264
+2025-12-26 16:36:42,890 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургский университет технологий управления и экономики (1064)
+2025-12-26 16:36:52,693 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Балтийский государственный технический университет «ВОЕНМЕХ» имени Д. Ф. Устинова (1069)
+2025-12-26 16:37:10,981 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Государственный университет морского и речного флота имени адмирала С. О. Макарова (1082)
+2025-12-26 16:37:19,686 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургский государственный аграрный университет (1085)
+2025-12-26 16:37:28,783 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургский государственный университет ветеринарной медицины (1092)
+2025-12-26 16:37:31,042 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Балтийская академия туризма и предпринимательства (1094)
+2025-12-26 16:37:34,450 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургский государственный архитектурно-строительный университет (1108)
+2025-12-26 16:37:49,662 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургская академия художеств имени Ильи Репина (1116)
+2025-12-26 16:37:55,474 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Ленинградский государственный университет имени А. С. Пушкина (1122)
+2025-12-26 16:38:11,032 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Российский государственный педагогический университет имени А. И. Герцена (1147)
+2025-12-26 17:10:08,495 | INFO | src.core.scraper | scrape_all |  Начало скраппинга...
+2025-12-26 17:10:08,498 | INFO | src.core.scraper | scrape_all | Загружено университетов: 264
+2025-12-26 17:10:08,500 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Санкт-Петербургский университет технологий управления и экономики (1064)
+2025-12-26 17:10:17,893 | INFO | src.core.scraper | scrape_university | 
+ Обработка: Балтийский государственный технический университет «ВОЕНМЕХ» имени Д. Ф. Устинова (1069)

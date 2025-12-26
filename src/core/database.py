@@ -2,12 +2,23 @@
 Модуль для сохранения данных в базу данных и экспорта в Excel'''
 import sqlite3
 import pandas as pd
+from pathlib import Path
+from data.mapping import mapping_320
+
 
 class DatabaseSaver:
-    def __init__(self):
-        self.conn = sqlite3.connect('final_info')
+    def __init__(self, db_path: Path | None = None):
+
+        if db_path is None:
+            project_root = Path(__file__).resolve().parents[2]
+            db_path = project_root / "data" / "final_info.db"
+
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+
+        self.conn = sqlite3.connect(db_path)
         self.create_final_table()
 
+    
     
     def create_final_table(self):
         """Создает итоговую таблицу в БД"""
@@ -16,9 +27,10 @@ class DatabaseSaver:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS final_info (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                derection_names TEXT,
+                direction_names TEXT,
                 city_name TEXT,
                 faculty TEXT,
+                faculty_id TEXT,
                 university_name TEXT,
                 ege TEXT,
                 cost TEXT,
@@ -42,9 +54,10 @@ class DatabaseSaver:
      to_isert=[]
      for data in scrapping_list:
          to_isert.append((
-             data['derection_names'],
+             data['direction_names'],
              data['city_name'],
              data['faculty'],
+             data['faculty_id'],
              data['university_name'],
              data['ege'],
              data['cost'],
@@ -56,8 +69,8 @@ class DatabaseSaver:
      try: 
             cursor.executemany('''
                 INSERT INTO final_info 
-                (derection_names, city_name, faculty, university_name, ege, cost, points_for_budget, budget_funded, points_for_contract, contract_funded)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (direction_names, city_name, faculty,faculty_id, university_name, ege, cost, points_for_budget, budget_funded, points_for_contract, contract_funded)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
             ''', to_isert)
             self.conn.commit()
             print(f"  Успешно сохранено {len(scrapping_list)} записей в итоговую таблицу")
@@ -67,9 +80,17 @@ class DatabaseSaver:
     def export_to_excel_programs(self, filename):
         """Экспортирует данные из БД в CSV"""
         df = pd.read_sql_query("SELECT * FROM final_info", self.conn)
+        #деление на обязательные егэ и по выбору
+        df[['ege','ege_1']] = df['ege'].str.rsplit(',', n=1, expand=True)
+
+        tmp = df["faculty"].map(mapping_320).apply(pd.Series)
+        tmp.columns = ["faculty_macro", "faculty"]# переименование колонок          
+        df[["faculty_macro", "faculty"]] = tmp
+        df.rename(columns={'direction_names': 'направление', 'city_name': 'город', 'faculty': 'факультет', 'faculty_id': '№ направления',
+                           'university_name': 'университет', 'ege': 'обязательные ЕГЭ', 'ege_1': 'ЕГЭ по выбору', 'cost': 'стоимость', 'points_for_budget': 'баллы для бюджета',
+                           'budget_funded': 'бюджетные места', 'points_for_contract': 'баллы для контракта', 'contract_funded': 'контрактные места'})
         df.to_excel(filename, index=False)
-        df.rename(columns={'derection_names': 'направление', 'city_name': 'город', 'faculty': 'факультет', 'university_name': 'университет', 'ege': 'баллы ЕГЭ', 'cost': 'стоимость', 'points_for_budget': 'баллы для бюджета', 'budget_funded': 'бюджетные места', 'points_for_contract': 'баллы для контракта', 'contract_funded': 'контрактные места'})
-    
+
         print(f"Данные экспортированы в {filename}") 
         
         

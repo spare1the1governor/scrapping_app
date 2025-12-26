@@ -7,9 +7,12 @@ from tkinter import filedialog, messagebox
 import threading
 import os
 from datetime import datetime 
+from src.utils.logger import setup_logger
+from pathlib import Path
+
 # from core.database import DatabaseSaver
 # from scraper import ScrapperOptimized
-
+logger = setup_logger(__name__)
 
 # Настройка темы
 ctk.set_appearance_mode("dark")  # "dark" или "light"
@@ -31,7 +34,7 @@ class UniversityScraperApp(ctk.CTk):
         # Переменные состояния
         self.is_scraping = False
         self.excel_name = None
-        self.db_path = "data/finale_info.db"
+        # self.db_path = "data/finale_info.db"
         
         # Создаём интерфейс
         self.create_widgets()
@@ -158,17 +161,18 @@ class UniversityScraperApp(ctk.CTk):
     def scraping_worker(self):
         """Рабочая функция парсинга (выполняется в отдельном потоке)"""
         try:
+            EXPORTS_DIR = Path("exports")
             self.log("🚀 Начало парсинга...")
-            from core.scraper import ScrapperOptimized
-            from core.database import DatabaseSaver
-            db = DatabaseSaver(self.db_path)
-            scraper = ScrapperOptimized(db)
-            scraper.scrapping()
-            self.excel_name=self.excel_name+".xlsx"
-            db.export_to_excel_programs(self.excel_name or "exported_data.xlsx")
+            from src.core.scraper import scrapping
+            from src.core.database import DatabaseSaver
+            db = DatabaseSaver()
+            scrapping()
+            file_name=f"{self.excel_name.get()}.xlsx"
+            db.export_to_excel_programs(EXPORTS_DIR / (file_name or "exported_data.xlsx"))
             
             
         except Exception as e:
+            logger.info({str(e)})
             self.log(f"Ошибка: {str(e)}")
             messagebox.showerror("Ошибка", f"Произошла ошибка:\n{str(e)}")
         

@@ -8,8 +8,10 @@ import re
 import time
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from core.database import DatabaseSaver
-import logging  
+from src.utils.logger import setup_logger
+from src.core.database import DatabaseSaver  
+
+logger = setup_logger(__name__)
 
 class ScrapperOptimized:
     def __init__(self, db, delay=1.0): 
@@ -40,7 +42,7 @@ class ScrapperOptimized:
             response.raise_for_status()
             return BeautifulSoup(response.text, 'html.parser')
         except Exception as e:
-            logging.error(f"   Ошибка загрузки {url}: {e}")
+            logger.error(f"   Ошибка загрузки {url}: {e}")
             return None
     
     def _get_total_pages(self, soup):
@@ -81,9 +83,10 @@ class ScrapperOptimized:
                 return None
             
             return {
-                'derection_names': title.text.strip(),
+                'direction_names': title.text.strip(),
                 'city_name': city_name,
                 'faculty': faculty_link.get_text(strip=True).split("|", 1)[-1].strip(),
+                'faculty_id':faculty_link.get_text(strip=True).split("|")[0],
                 'university_name': university_name,
                 'ege': osnBlock.get_text(strip=True).split(":")[1] if ":" in osnBlock.get_text() else "",
                 'cost': cost_block.text.replace('Стоимость', '').replace('₽минимальная стоимость по программе (руб/год)', '').strip(),
@@ -93,7 +96,7 @@ class ScrapperOptimized:
                 'contract_funded': paid_funded
             }
         except Exception as e:
-            logging.error(f" Ошибка парсинга блока: {e}")
+            logger.error(f" Ошибка парсинга блока: {e}")
             return None
     
     def _parse_university_page(self, soup, page_num, total_pages, city_name, university_name):
@@ -118,20 +121,20 @@ class ScrapperOptimized:
     def scrape_university(self, uni_id, university_name, city_name):
         """Парсит один университет"""
         
-        logging.info(f"\n Обработка: {university_name} ({uni_id})")
+        logger.info(f"\n Обработка: {university_name} ({uni_id})")
         
         # Получаем первую страницу
         first_url = f'https://vuzopedia.ru/vuz/{uni_id}/programs/bakispec?page=1'
         first_soup = self._get_page(first_url)
         
         if not first_soup:
-            logging.error(f"   Не удалось загрузить первую страницу")
+            logger.error(f"   Не удалось загрузить первую страницу")
             self.total_errors += 1
             return 0
         
         # Определяем количество страниц
         total_pages = self._get_total_pages(first_soup)
-        logging.debug(f" Найдено страниц: {total_pages}")
+        logger.debug(f" Найдено страниц: {total_pages}")
         
         uni_total = 0
         
@@ -155,28 +158,27 @@ class ScrapperOptimized:
                 try:
                     self.db.save_all_data(page_results)
                     uni_total += len(page_results)
-                    logging.debug(f"  Страница {page_num}/{total_pages}: сохранено {len(page_results)} программ")
+                    logger.debug(f"  Страница {page_num}/{total_pages}: сохранено {len(page_results)} программ")
                 except Exception as e:
-                    logging.error(f"  Ошибка сохранения страницы {page_num}: {e}")
+                    logger.error(f"  Ошибка сохранения страницы {page_num}: {e}")
                     self.total_errors += 1
         
-        logging.debug(f"  Итого по вузу: {uni_total} программ")
+        logger.debug(f"  Итого по вузу: {uni_total} программ")
         self.total_saved += uni_total
         return uni_total
     
-    def scrape_all(self, csv_file="necessary_notes.csv"):
+    def scrape_all(self, csv_file=r"C:\Users\Lenovo\Desktop\vuzopedia_scrapping\data\necessary_notese.csv"):
         """Парсит все университеты из CSV"""
-        logging.basicConfig(level=logging.INFO,filename='scraper.log',filemode='w')
-        logging.info(" Начало скраппинга...")
+        logger.info(" Начало скраппинга...")
         
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        csv_file = os.path.join(project_root, "data", csv_file)
+        # project_root = os.path.dirname(os.path.abspath(__file__))
+        # csv_file = os.path.join(project_root, "data", csv_file)
         
         try:
             df = pd.read_csv(csv_file)
-            logging.info(f"Загружено университетов: {len(df)}")
+            logger.info(f"Загружено университетов: {len(df)}")
         except Exception as e:
-            logging.error(f" Ошибка чтения CSV: {e}")
+            logger.error(f" Ошибка чтения CSV: {e}")
             return
         
         start_time = time.time()
@@ -190,19 +192,18 @@ class ScrapperOptimized:
         
         elapsed = time.time() - start_time
 
-        logging.info(f"\n{'='*60}")
-        logging.info(f"✅ Скраппинг завершён!")
-        logging.info(f" Всего сохранено программ: {self.total_saved}")
-        logging.info(f"Ошибок: {self.total_errors}")
-        logging.info(f" Время выполнения: {elapsed:.1f} сек ({elapsed/60:.1f} мин)")
+        logger.info(f"\n{'='*60}")
+        logger.info(f"✅ Скраппинг завершён!")
+        logger.info(f" Всего сохранено программ: {self.total_saved}")
+        logger.info(f"Ошибок: {self.total_errors}")
+        logger.info(f" Время выполнения: {elapsed:.1f} сек ({elapsed/60:.1f} мин)")
         
         self.db.close()
 
-
-# Использование:
-def scrapping():    
-    db = DatabaseSaver()
-    scraper = ScrapperOptimized(db)  
-    scraper.scrape_all()
+    # Использование:
+def scrapping():  
+        db = DatabaseSaver()
+        scraper = ScrapperOptimized(db)  
+        scraper.scrape_all()
 
 
