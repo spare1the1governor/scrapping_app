@@ -1,11 +1,12 @@
 '''
-Модуль для скраппинга данных с сайта vuzopedia.ru'''
+Модуль для скраппинга данных с сайта vuzopedia.ru
+'''
 import os
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import re
-import time
+import time    
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from src.utils.logger import setup_logger
